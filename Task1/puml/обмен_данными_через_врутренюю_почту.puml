@@ -1,0 +1,16 @@
+@startuml
+!theme plain
+title Обмен данными через внутреннюю почту
+
+actor "Сотрудник 1" as employee1
+actor "Сотрудник 2" as employee2
+node "Exchange Mail Server" as mail
+
+employee1 -> mail : Отправляет сообщение\nс конфиденциальными данными
+mail -> employee2 : Доставляет сообщение
+
+note right of mail
+  Передача данных без шифрования
+  и контроля содержимого
+end note
+@enduml

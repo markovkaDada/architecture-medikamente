@@ -1,0 +1,14 @@
+@startuml
+!theme plain
+title Работа врача с журналами записей
+
+actor "Врач" as doctor
+storage "Excel-файл\nJournal-Doctor-FIO" as journal
+
+doctor -> journal : Просматривает и редактирует\nжурнал записей
+
+note right of journal
+  Доступ к данным о записях
+  без контроля изменений
+end note
+@enduml

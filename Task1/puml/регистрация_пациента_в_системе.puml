@@ -1,0 +1,16 @@
+@startuml
+!theme plain
+title Регистрация пациента в системе
+
+actor "Администратор" as admin
+entity "Пациент" as patient
+storage "Excel-файл\nPatients" as patients_excel
+
+patient -> admin : Предоставляет персональные данные\n(ФИО, дата рождения, телефон, email)
+admin -> patients_excel : Вносит данные пациента
+
+note right of patients_excel
+  Хранит персональные данные
+  без шифрования и контроля доступа
+end note
+@enduml

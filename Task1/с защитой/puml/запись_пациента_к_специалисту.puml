@@ -1,0 +1,22 @@
+@startuml
+!theme plain
+title Запись пациента к специалисту (с защитой)
+
+entity "Пациент" as patient
+actor "Администратор" as admin
+actor "Врач" as doctor
+database "Система управления\nзаписями" as appointment_system
+
+patient -> admin : Запрашивает запись\n к специалисту
+admin -> appointment_system : Вносит данные о записи\n<b>Защита:</b> RBAC, аудит действий
+doctor -> appointment_system : Просматривает расписание\n<b>Защита:</b> Ограниченный доступ
+
+note right of appointment_system
+<b>Теги данных:</b> PII, PHI, L2
+<b>Защита:</b>
+- Аутентификация по ролям
+- Шифрование данных
+- Журналирование доступа
+- Обезличивание в отчетах
+  end note
+  @enduml

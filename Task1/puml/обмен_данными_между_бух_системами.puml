@@ -1,0 +1,18 @@
+@startuml
+!theme plain
+title Обмен данными между бухгалтерскими системами
+
+actor "Бухгалтер" as accountant
+actor "Сотрудник склада" as warehouse
+participant "1С Бухгалтерия\nпредприятия" as accounting
+participant "1С Торговля и склад" as trade
+
+accountant -> accounting : Процессинг платежей
+warehouse -> trade : Учет ТМЦ
+accounting <-> trade : Внутриплатформенный обмен\nданными (OLE)
+
+note right of trade
+  Обмен финансовыми данными
+  без аудита действий
+end note
+@enduml

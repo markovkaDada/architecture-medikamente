@@ -1,0 +1,20 @@
+@startuml
+!theme plain
+title Лабораторные исследования
+
+node "Медицинская\n лаборатория" as lab
+
+folder "Laboratory Registry" as lab_folder {
+  storage "RegistryByDate 1" as registry1
+  storage "RegistryByDate 2" as registry2
+  storage "RegistryByDate 3" as registry3
+}
+
+
+lab -> lab_folder : Сохраняет реестры анализов за день
+
+note right of lab_folder
+  Содержит результаты анализов
+  с привязкой к персональным данным
+end note
+@enduml
