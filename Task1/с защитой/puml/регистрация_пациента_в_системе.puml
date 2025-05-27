@@ -1,0 +1,29 @@
+@startuml
+!theme plain
+title Регистрация пациента в системе (с защитой)
+
+actor "Администратор" as admin
+entity "Пациент" as patient
+database "Защищенная БД\nпациентов" as patients_db
+storage "Зашифрованный\nExcel-файл" as patients_excel
+
+patient -> admin : Предоставляет персональные данные\n(ФИО, дата рождения, телефон, email)
+admin -> patients_db : Вносит данные пациента\n<b>Защита:</b> RBAC, аудит действий
+admin -> patients_excel : Резервное копирование\n<b>Защита:</b> Шифрование AES-256
+
+note right of patients_db
+  <b>Теги данных:</b> PII, L3
+  <b>Защита:</b>
+  - Шифрование в состоянии покоя
+  - Многофакторная аутентификация
+  - Журналирование всех действий
+end note
+
+note right of patients_excel
+  <b>Теги данных:</b> PII, L3
+  <b>Защита:</b>
+  - Шифрование файла
+  - Контроль доступа на уровне ОС
+  - Хранение в защищенном хранилище
+end note
+@enduml

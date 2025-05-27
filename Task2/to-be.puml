@@ -1,0 +1,140 @@
+@startuml "Медикаменте - MVP Архитектура с Data Privacy"
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title "Медикаменте - MVP Архитектура с Data Privacy"
+
+Person_Ext(patient, "Пациент", "Пользователь медицинских услуг")
+Person(receptionist, "Администратор", "Сотрудник ресепшена")
+Person(doctor, "Врач", "Специалист-медик")
+
+System_Boundary(medikamente, "МЕДИКАМЕНТЕ") {
+    Container(patient_portal, "Портал для пациентов", "React, TypeScript", "Веб-интерфейс для самостоятельной записи на прием и просмотра своих данных")
+
+    Container(staff_portal, "Портал для сотрудников", "React, TypeScript", "Интерфейс для работы администраторов и врачей")
+
+    Container(api_gateway, "API Gateway", "Spring Cloud Gateway", "Единая точка входа для всех API, управление доступом, аутентификация")
+
+    Container(auth_service, "Сервис аутентификации", "Spring Boot, OAuth2/OIDC", "Управление идентификацией, аутентификацией и авторизацией")
+
+    Container(appointment_service, "Сервис записи на прием", "Spring Boot, Java", "Управление расписанием и записями к специалистам")
+
+    Container(patient_service, "Сервис пациентов", "Spring Boot, Java", "Управление данными пациентов")
+
+    Container(notification_service, "Сервис уведомлений", "Spring Boot, Java", "Отправка уведомлений пациентам и сотрудникам")
+
+    Container(audit_service, "Сервис аудита", "Spring Boot, Java", "Журналирование и мониторинг доступа к данным")
+
+    Container(data_classification_service, "Сервис классификации данных", "Spring Boot, Java", "Тегирование и классификация конфиденциальных данных")
+
+    ContainerDb(appointment_db, "База данных записей", "PostgreSQL", "Хранит информацию о записях к специалистам")
+
+    ContainerDb(patient_db, "База данных пациентов", "PostgreSQL с шифрованием", "Хранит персональные данные пациентов")
+
+    ContainerDb(audit_db, "База данных аудита", "PostgreSQL", "Хранит журналы доступа к данным")
+
+    Container(lab_integration, "Сервис интеграции с лабораторией", "Spring Boot, Java", "Интеграция с API лаборатории анализов")
+}
+
+System_Ext(lab_system, "Лаборатория анализов", "Внешняя система для проведения медицинских анализов")
+System_Ext(email_system, "Почтовый сервер", "Система для отправки email-уведомлений")
+System_Ext(sms_gateway, "SMS-шлюз", "Система для отправки SMS-уведомлений")
+
+' Связи между компонентами
+Rel(patient, patient_portal, "Использует для записи на прием", "HTTPS")
+Rel(receptionist, staff_portal, "Управляет записями и данными пациентов", "HTTPS")
+Rel(doctor, staff_portal, "Просматривает расписание и данные пациентов", "HTTPS")
+
+Rel(patient_portal, api_gateway, "Отправляет запросы", "HTTPS, JWT")
+Rel(staff_portal, api_gateway, "Отправляет запросы", "HTTPS, JWT")
+
+Rel(api_gateway, auth_service, "Проверяет токены и права доступа", "HTTPS, JWT")
+Rel(api_gateway, appointment_service, "Перенаправляет запросы", "HTTPS, JWT")
+Rel(api_gateway, patient_service, "Перенаправляет запросы", "HTTPS, JWT")
+Rel(api_gateway, notification_service, "Перенаправляет запросы", "HTTPS, JWT")
+
+Rel(appointment_service, appointment_db, "Читает/записывает данные о записях", "TLS, подготовленные запросы")
+Rel(appointment_service, audit_service, "Отправляет события аудита", "Асинхронно, Kafka")
+Rel(appointment_service, notification_service, "Запрашивает отправку уведомлений", "REST API, HTTPS")
+
+Rel(patient_service, patient_db, "Читает/записывает данные пациентов", "TLS, подготовленные запросы")
+Rel(patient_service, data_classification_service, "Классифицирует данные", "REST API, HTTPS")
+Rel(patient_service, audit_service, "Отправляет события аудита", "Асинхронно, Kafka")
+
+Rel(notification_service, email_system, "Отправляет email-уведомления", "SMTP, TLS")
+Rel(notification_service, sms_gateway, "Отправляет SMS-уведомления", "REST API, HTTPS")
+
+Rel(lab_integration, lab_system, "Получает результаты анализов", "REST API, HTTPS, mTLS")
+Rel(lab_integration, patient_service, "Сохраняет результаты анализов", "REST API, HTTPS")
+Rel(lab_integration, audit_service, "Отправляет события аудита", "Асинхронно, Kafka")
+
+Rel(audit_service, audit_db, "Сохраняет события аудита", "TLS, подготовленные запросы")
+
+note right of patient_db
+  <b>Хранение данных:</b>
+  - Шифрование данных в состоянии покоя (TDE)
+  - Разделение данных по категориям чувствительности
+  - Псевдонимизация идентификаторов
+  - Маскирование данных при отображении
+
+  <b>Периоды хранения и уничтожения:</b>
+  - Медицинские данные: 25 лет с последнего визита
+  - Контактные данные: 5 лет с последнего визита
+  - Финансовые данные: 5 лет (законодательное требование)
+  - Автоматическое уничтожение по истечении срока
+  - Немедленное удаление по запросу пациента (право на забвение)
+
+  <b>Защита при хранении:</b>
+  - Шифрование на уровне базы данных
+  - Контроль доступа на основе ролей (RBAC)
+  - Журналирование всех операций доступа
+end note
+
+note right of api_gateway
+  <b>Защита при передаче данных:</b>
+  - TLS 1.3 для всех соединений
+  - JWT с коротким сроком жизни
+  - Подписание и шифрование токенов
+  - Проверка целостности данных
+  - Фильтрация и валидация входящих данных
+  - Предотвращение CSRF/XSS атак
+end note
+
+note right of auth_service
+  <b>Управление доступом:</b>
+  - Многофакторная аутентификация
+  - Детальное управление правами на основе ролей (RBAC)
+  - Атрибутивный контроль доступа (ABAC) для особо чувствительных данных
+  - Временные ограничения доступа
+  - Автоматический выход при бездействии
+end note
+
+note right of data_classification_service
+  <b>Классификация данных:</b>
+  - Автоматическое тегирование данных по категориям:
+    * PII (персональные идентификаторы)
+    * PHI (защищенная медицинская информация)
+    * FIN (финансовая информация)
+  - Уровни конфиденциальности (L1-L3)
+  - Метаданные о сроках хранения
+  - Правила обработки для каждой категории
+end note
+
+note right of audit_service
+  <b>Аудит и мониторинг:</b>
+  - Журналирование всех операций с конфиденциальными данными
+  - Обнаружение аномального поведения
+  - Оповещения о подозрительной активности
+  - Неизменяемые журналы аудита
+  - Регулярные отчеты о доступе к данным
+end note
+
+note right of lab_integration
+  <b>Защита при интеграции:</b>
+  - Взаимная аутентификация (mTLS)
+  - Минимизация передаваемых данных
+  - Обезличивание данных при передаче
+  - Проверка целостности данных
+  - Шифрование всего трафика
+end note
+
+@enduml

@@ -1,0 +1,18 @@
+@startuml
+!theme plain
+title Оплата медицинских услуг
+
+entity "Пациент" as patient
+actor "Кассир" as cashier
+participant "ККМ" as kkm
+participant "1С Бухгалтерия" as accounting
+
+patient -> cashier : Оплачивает услуги
+cashier -> kkm : Вносит данные о платеже
+kkm -> accounting : Передает информацию о принятии\nденежных средств (TCP/IP-OLE)
+
+note right of accounting
+  Финансовая информация,
+  привязанная к персональным данным
+end note
+@enduml

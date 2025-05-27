@@ -1,0 +1,18 @@
+@startuml
+!theme plain
+title Запись пациента к специалисту
+
+actor "Администратор" as admin
+entity "Пациент" as patient
+actor "Врач" as doctor
+storage "Excel-файл\nJournal-Doctor-FIO" as journal
+
+patient -> admin : Запрашивает запись к специалисту
+admin -> journal : Вносит данные о записи\n(ФИО пациента, дата, время)
+doctor -> journal : Просматривает и редактирует журнал
+
+note right of journal
+  Содержит информацию о записях
+  без разграничения доступа
+end note
+@enduml

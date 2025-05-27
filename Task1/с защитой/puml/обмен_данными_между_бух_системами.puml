@@ -1,0 +1,22 @@
+@startuml
+!theme plain
+title Обмен данными между бухгалтерскими системами (с защитой)
+
+actor "Бухгалтер" as accountant
+actor "Сотрудник склада" as warehouse
+node "1С Бухгалтерия\nс шифрованием" as accounting
+node "1С Торговля и склад\nс шифрованием" as trade
+
+accountant -> accounting : Процессинг платежей\n<b>Защита:</b> MFA, аудит
+warehouse -> trade : Учет ТМЦ\n<b>Защита:</b> RBAC, аудит
+accounting <-> trade : Обмен данными\n<b>Защита:</b> Защищенный канал, шифрование
+
+note bottom of trade
+  <b>Теги данных:</b> FIN, INT, L2
+  <b>Защита:</b>
+  - Шифрование данных при передаче
+  - Шифрование данных при хранении
+  - Строгая аутентификация
+  - Полный аудит всех операций
+end note
+@enduml

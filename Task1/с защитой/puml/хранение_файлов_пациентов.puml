@@ -1,0 +1,22 @@
+@startuml
+!theme plain
+title Хранение файлов пациентов (с защитой)
+
+actor "Администратор" as admin
+entity "Пациент" as patient
+folder "Защищенное хранилище" as secure_storage {
+  storage "Зашифрованные\nфайлы пациента" as patient_files
+}
+
+patient -> admin : Предоставляет медицинские документы\n(результаты обследований, анализы)
+admin -> secure_storage : Загружает файлы\n<b>Защита:</b> Шифрование, аудит доступа
+
+note right of secure_storage
+  <b>Теги данных:</b> PHI, PII, L3
+  <b>Защита:</b>
+  - Шифрование на уровне файлов (VeraCrypt)
+  - Разграничение доступа (RBAC)
+  - Журналирование всех операций
+  - Резервное копирование
+end note
+@enduml

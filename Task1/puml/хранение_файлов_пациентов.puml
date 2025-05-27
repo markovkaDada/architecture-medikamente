@@ -1,0 +1,21 @@
+@startuml
+!theme plain
+title Хранение файлов пациентов
+
+actor "Администратор" as admin
+entity "Пациент" as patient
+folder "Pacient1-FIO-BD" as patient_folder {
+  storage "Data file 1" as data_file1
+  storage "Data file 2" as data_file2
+  storage "Data file 3" as data_file3
+}
+
+patient -> admin : Предоставляет медицинские документы\n(результаты обследований, анализы)
+admin -> patient_folder : Сохраняет файлы (JPG, PDF)
+
+note right of patient_folder
+  Хранит конфиденциальную
+  медицинскую информацию
+  без защиты
+end note
+@enduml
